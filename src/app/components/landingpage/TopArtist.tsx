@@ -97,12 +97,12 @@ const TopArtist = () => {
   return (
     <section className="flex flex-col w-[75vw] gap-[1.111vw]">
       <div className="flex flex-row justify-between items-end">
-        <p className="text-[1.667vw] text-white font-bold">Top Artist</p>
+        <p className="text-[1.667vw] text-[var(--color-emas-nusantara)] font-bold font-jakarta">Top Artis</p>
         <button
           onClick={() => {}}
-          className="cursor-pointer text-white-darker text-[0.833vw] font-jakarta"
+          className="cursor-pointer text-[var(--color-krem-lontar)]/70 text-[0.833vw] font-jakarta hover:text-[var(--color-emas-nusantara)] transition-colors"
         >
-          Show all
+          Lihat Semua
         </button>
       </div>
       <div className="w-full flex flex-row justify-center rounded-[1.042vw] bg-neutral-400 text-white"></div>
@@ -127,17 +127,17 @@ const TopArtist = () => {
                 <div className="flex flex-row gap-[0.333vw] p-[0.556vw] relative z-10"></div>
               </div>
             </div>
-            <div className="flex flex-row justify-between">
+            <div className="flex flex-row justify-between items-start">
               <div className="flex flex-col gap-[0.333vw] text-start">
-                <p className="text-white font-jakarta text-[1.111vw] font-[700]">
+                <p className="text-[var(--color-krem-lontar)] font-jakarta text-[1.111vw] font-bold">
                   {artist.artistName}
                 </p>
-                <p className="text-white font-jakarta text-[0.833vw] font-regular">
+                <p className="text-[var(--color-emas-nusantara)] font-jakarta text-[0.833vw] font-regular">
                   {artist.artistDesc}
                 </p>
               </div>
-              <div className="cursor-pointer w-[1.667vw] aspect-[24/24] flex justify-center bg-blackrounded-[1.042vw]">
-                <RiArrowRightUpLine color="white" size={24} />
+              <div className="cursor-pointer w-[2.5vw] h-[2.5vw] min-w-[36px] min-h-[36px] flex items-center justify-center rounded-full bg-[var(--color-coklat-jati)] hover:bg-[var(--color-emas-nusantara)] transition-transform hover:scale-105 shadow-wayang">
+                <RiArrowRightUpLine color="var(--color-krem-lontar)" size={20} />
               </div>
             </div>
           </button>

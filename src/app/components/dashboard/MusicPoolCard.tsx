@@ -32,12 +32,12 @@ const MusicPoolCard = ({
         {playable && isHovered && (
           <button
             onClick={onClickPlay}
-            className="cursor-pointer absolute right-[1.111vw] bottom-[1.111vw] z-20"
+            className="cursor-pointer absolute right-[1.111vw] bottom-[1.111vw] z-20 transition-transform hover:scale-110"
           >
             {isPlayingSong ? (
-              <FaPauseCircle size={40} color={"#552368"} />
+              <FaPauseCircle size={44} className="text-[var(--color-emas-nusantara)] drop-shadow-[0_2px_8px_rgba(212,175,55,0.6)]" />
             ) : (
-              <FaCirclePlay size={40} color={"#552368"} />
+              <FaCirclePlay size={44} className="text-[var(--color-emas-nusantara)] drop-shadow-[0_2px_8px_rgba(212,175,55,0.6)]" />
             )}
           </button>
         )}

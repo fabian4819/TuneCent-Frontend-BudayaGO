@@ -24,7 +24,7 @@ const WalletPage = () => {
 
   if (!authenticated) {
     return (
-      <div className="w-[75vw] flex flex-col bg-black gap-[2.222vw] items-center justify-center min-h-[50vh]">
+      <div className="w-full flex flex-col bg-black gap-[2.222vw] items-center justify-center min-h-[50vh]">
         <div className="flex flex-col items-center gap-[1.111vw]">
           <p className="text-white font-jakarta font-bold text-[1.667vw]">
             Connect Your Wallet
@@ -44,7 +44,7 @@ const WalletPage = () => {
   }
 
   return (
-    <div className="w-[75vw] flex flex-col bg-black gap-[2.222vw]">
+    <div className="w-full flex flex-col bg-black gap-[2.222vw]">
       {/* Wallet Info Header */}
       {wallet && (
         <div className="bg-gradient-to-r from-[#8B609B]/20 to-[#302135]/20 rounded-[1.042vw] p-[1.667vw] border border-white/10">

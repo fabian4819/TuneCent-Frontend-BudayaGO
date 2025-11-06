@@ -118,13 +118,13 @@ const Leaderboard = ({ category = "Artist" }: LeaderboardProps) => {
         </p>
         <button
           onClick={() => {}}
-          className="cursor-pointer text-[0.972vw] text-[var(--color-krem-lontar)]/70 font-regular font-jakarta hover:text-[var(--color-emas-nusantara)] transition-colors"
+          className="cursor-pointer text-[0.972vw] text-[var(--color-coklat-jati)] font-regular font-jakarta hover:text-[var(--color-emas-nusantara)] transition-colors"
         >
           Lihat Semua
         </button>
       </div>
       {category === "Musician" ? (
-        <div className="flex flex-col w-full aspect-[481/180] p-[0.333vw] gap-[0.333vw] relative z-[1]">
+        <div className="flex flex-col w-full aspect-[481/180] p-[0.444vw] gap-[0.556vw] relative z-[1]">
           {LeaderboardMusisiArray.map((leaderboardKey) => (
             <div
               key={leaderboardKey.rank}
@@ -132,15 +132,15 @@ const Leaderboard = ({ category = "Artist" }: LeaderboardProps) => {
             >
               {leaderboardKey.isYourProfile ? (
                 <div className="w-full flex flex-row justify-between items-center">
-                  <div className="flex flex-row items-center gap-[0.667vw] font-jakarta text-[var(--color-krem-lontar)]">
+                  <div className="flex flex-row items-center gap-[0.667vw] font-jakarta text-[var(--color-hitam-ebony)]">
                     <p className="text-[1.667vw] font-bold text-[var(--color-emas-nusantara)]">
                       {leaderboardKey.rank}
                     </p>
                     <div className="flex flex-col gap-[0.111vw]">
-                      <p className="text-[1.389vw] font-bold">
+                      <p className="text-[1.389vw] font-bold text-[var(--color-hitam-ebony)]">
                         {leaderboardKey.artist}
                       </p>
-                      <p className="text-[0.833vw] text-[var(--color-emas-nusantara)]">
+                      <p className="text-[0.833vw] text-[var(--color-coklat-jati)]">
                         skor: {leaderboardKey.score}
                       </p>
                     </div>
@@ -152,11 +152,11 @@ const Leaderboard = ({ category = "Artist" }: LeaderboardProps) => {
                   </div>
                 </div>
               ) : (
-                <div className="flex flex-row items-center gap-[0.667vw] font-jakarta text-[var(--color-krem-lontar)]">
-                  <p className="text-[0.833vw]">{leaderboardKey.rank}</p>
+                <div className="flex flex-row items-center gap-[0.667vw] font-jakarta">
+                  <p className="text-[1vw] font-bold text-[var(--color-emas-nusantara)]/80 min-w-[1.5vw]">{leaderboardKey.rank}</p>
                   <div className="flex flex-col gap-[0.111vw]">
-                    <p className="text-[0.972vw]">{leaderboardKey.artist}</p>
-                    <p className="text-[0.833vw] text-[var(--color-krem-lontar)]/70">
+                    <p className="text-[1.05vw] font-semibold text-[var(--color-hitam-ebony)]">{leaderboardKey.artist}</p>
+                    <p className="text-[0.833vw] text-[var(--color-coklat-jati)]">
                       skor: {leaderboardKey.score}
                     </p>
                   </div>
@@ -166,7 +166,7 @@ const Leaderboard = ({ category = "Artist" }: LeaderboardProps) => {
           ))}
         </div>
       ) : category === "Artist" ? (
-        <div className="flex flex-col w-full aspect-[481/180] p-[0.333vw] gap-[0.333vw] relative z-[1]">
+        <div className="flex flex-col w-full aspect-[481/180] p-[0.444vw] gap-[0.556vw] relative z-[1]">
           {LeaderboardArtistArray.map((leaderboardKey) => (
             <div
               key={leaderboardKey.rank}
@@ -174,7 +174,7 @@ const Leaderboard = ({ category = "Artist" }: LeaderboardProps) => {
             >
               {leaderboardKey.isTopProfile ? (
                 <div className="w-full flex flex-row justify-between items-center">
-                  <div className="flex flex-row items-center gap-[0.667vw] font-jakarta text-[var(--color-krem-lontar)]">
+                  <div className="flex flex-row items-center gap-[0.667vw] font-jakarta text-[var(--color-hitam-ebony)]">
                     <div className="relative">
                       <p className="text-[1.667vw] font-bold text-[var(--color-emas-nusantara)]">
                         {leaderboardKey.rank}
@@ -184,21 +184,21 @@ const Leaderboard = ({ category = "Artist" }: LeaderboardProps) => {
                       </div>
                     </div>
                     <div className="flex flex-col gap-[0.111vw]">
-                      <p className="text-[1.389vw] font-bold">
+                      <p className="text-[1.389vw] font-bold text-[var(--color-hitam-ebony)]">
                         {leaderboardKey.artist}
                       </p>
-                      <p className="text-[0.833vw] text-[var(--color-emas-nusantara)]">
+                      <p className="text-[0.833vw] text-[var(--color-coklat-jati)]">
                         skor: {leaderboardKey.score}
                       </p>
                     </div>
                   </div>
                 </div>
               ) : (
-                <div className="flex flex-row items-center gap-[0.667vw] font-jakarta text-[var(--color-krem-lontar)]">
-                  <p className="text-[0.833vw]">{leaderboardKey.rank}</p>
+                <div className="flex flex-row items-center gap-[0.667vw] font-jakarta">
+                  <p className="text-[1vw] font-bold text-[var(--color-emas-nusantara)]/80 min-w-[1.5vw]">{leaderboardKey.rank}</p>
                   <div className="flex flex-col gap-[0.111vw]">
-                    <p className="text-[0.972vw]">{leaderboardKey.artist}</p>
-                    <p className="text-[0.833vw] text-[var(--color-krem-lontar)]/70">
+                    <p className="text-[1.05vw] font-semibold text-[var(--color-hitam-ebony)]">{leaderboardKey.artist}</p>
+                    <p className="text-[0.833vw] text-[var(--color-coklat-jati)]">
                       skor: {leaderboardKey.score}
                     </p>
                   </div>
@@ -208,7 +208,7 @@ const Leaderboard = ({ category = "Artist" }: LeaderboardProps) => {
           ))}
         </div>
       ) : (
-        <div className="flex flex-col w-full aspect-[481/180] p-[0.333vw] gap-[0.333vw] relative z-[1]">
+        <div className="flex flex-col w-full aspect-[481/180] p-[0.444vw] gap-[0.556vw] relative z-[1]">
           {LeaderboardMusicArray.map((leaderboardKey) => (
             <div
               key={leaderboardKey.rank}
@@ -216,7 +216,7 @@ const Leaderboard = ({ category = "Artist" }: LeaderboardProps) => {
             >
               {leaderboardKey.isTopProfile ? (
                 <div className="w-full flex flex-row justify-between items-center">
-                  <div className="flex flex-row items-center gap-[0.667vw] font-jakarta text-[var(--color-krem-lontar)]">
+                  <div className="flex flex-row items-center gap-[0.667vw] font-jakarta text-[var(--color-hitam-ebony)]">
                     <div className="relative">
                       <p className="text-[1.667vw] font-bold text-[var(--color-emas-nusantara)]">
                         {leaderboardKey.rank}
@@ -226,21 +226,21 @@ const Leaderboard = ({ category = "Artist" }: LeaderboardProps) => {
                       </div>
                     </div>
                     <div className="flex flex-col gap-[0.111vw]">
-                      <p className="text-[1.389vw] font-bold">
+                      <p className="text-[1.389vw] font-bold text-[var(--color-hitam-ebony)]">
                         {leaderboardKey.artist}
                       </p>
-                      <p className="text-[0.833vw] text-[var(--color-emas-nusantara)]">
+                      <p className="text-[0.833vw] text-[var(--color-coklat-jati)]">
                         skor: {leaderboardKey.score}
                       </p>
                     </div>
                   </div>
                 </div>
               ) : (
-                <div className="flex flex-row items-center gap-[0.667vw] font-jakarta text-[var(--color-krem-lontar)]">
-                  <p className="text-[0.833vw]">{leaderboardKey.rank}</p>
+                <div className="flex flex-row items-center gap-[0.667vw] font-jakarta">
+                  <p className="text-[1vw] font-bold text-[var(--color-emas-nusantara)]/80 min-w-[1.5vw]">{leaderboardKey.rank}</p>
                   <div className="flex flex-col gap-[0.111vw]">
-                    <p className="text-[0.972vw]">{leaderboardKey.artist}</p>
-                    <p className="text-[0.833vw] text-[var(--color-krem-lontar)]/70">
+                    <p className="text-[1.05vw] font-semibold text-[var(--color-hitam-ebony)]">{leaderboardKey.artist}</p>
+                    <p className="text-[0.833vw] text-[var(--color-coklat-jati)]">
                       skor: {leaderboardKey.score}
                     </p>
                   </div>

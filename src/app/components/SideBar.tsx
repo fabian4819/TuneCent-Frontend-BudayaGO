@@ -18,6 +18,8 @@ import {
 
 interface SideBarProps {
   variant?: "musician" | "user";
+  isOpen: boolean;
+  onToggle: () => void;
 }
 interface SideBarMenuProps {
   id: number;
@@ -42,7 +44,7 @@ const SideBarMenuUser: SideBarMenuProps[] = [
   { id: 5, menu: "Sign Out", icon: RiLogoutBoxRLine, link: "" },
 ];
 
-const SideBar = ({ variant = "musician" }: SideBarProps) => {
+const SideBar = ({ variant = "musician", isOpen, onToggle }: SideBarProps) => {
   const router = useRouter();
   const [activeMenu, setActiveMenu] = useState<string>(() =>
     variant === "musician" ? "Dashboard" : "Home"
@@ -58,7 +60,7 @@ const SideBar = ({ variant = "musician" }: SideBarProps) => {
   };
 
   return (
-    <div className="fixed left-0 top-0 h-screen flex flex-col bg-neutral-black-base w-[17.222vw] px-[1.111vw] py-[1.667vw] gap-[2vw] overflow-y-auto">
+    <div className={`fixed left-0 top-[var(--nav-h)] h-[calc(100vh-var(--nav-h))] flex flex-col bg-neutral-black-base w-[17.222vw] px-[1.111vw] py-[1.667vw] gap-[2vw] overflow-y-auto transition-transform duration-300 ease-in-out z-40 border-r-2 border-[var(--color-coklat-jati)]/30 ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
       <button
         onClick={() => router.push("/")}
         className="flex flex-row gap-[0.556vw] items-center cursor-pointer hover:opacity-80 transition-opacity"

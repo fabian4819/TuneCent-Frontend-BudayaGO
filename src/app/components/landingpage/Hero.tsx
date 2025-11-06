@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import NusantaraIcon from "../common/NusantaraIcon";
+// import NusantaraIcon from "../common/NusantaraIcon";
 
 const Hero = () => {
   const router = useRouter();
@@ -34,7 +34,7 @@ const Hero = () => {
           }}
           className="btn-secondary-nusantara cursor-pointer w-[16.25vw] flex flex-row justify-center items-center gap-[0.5vw] transition-nusantara hover:scale-105"
         >
-          <NusantaraIcon icon="angklung-note" size={20} />
+          {/* <NusantaraIcon icon="angklung-note" size={20} /> */}
           <p className="text-[0.972vw] font-jakarta font-semibold">
             Temukan Musik
           </p>
@@ -45,7 +45,7 @@ const Hero = () => {
           }}
           className="btn-primary-nusantara cursor-pointer w-[16.25vw] flex flex-row justify-center items-center gap-[0.5vw]"
         >
-          <NusantaraIcon icon="gamelan-icon" size={20} />
+          {/* <NusantaraIcon icon="gamelan-icon" size={20} /> */}
           <p className="text-[0.972vw] font-jakarta font-semibold">
             Mulai Berkarya
           </p>

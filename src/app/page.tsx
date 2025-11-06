@@ -32,17 +32,17 @@ export default function Home() {
         <Hero />
 
         {/* Gorga Divider */}
-        <div className="divider-gorga w-full my-8" />
+        {/* <div className="divider-gorga w-full my-8" /> */}
 
         <MusicPool title="Lagu Trending" />
 
         {/* Gorga Divider */}
-        <div className="divider-gorga w-full my-8" />
+        {/* <div className="divider-gorga w-full my-8" /> */}
 
         <TopArtist />
 
         {/* Gorga Divider */}
-        <div className="divider-gorga w-full my-8" />
+        {/* <div className="divider-gorga w-full my-8" /> */}
 
         <div className="w-full flex flex-row justify-between gap-[1.111vw]">
           <Leaderboard />

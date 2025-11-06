@@ -286,13 +286,13 @@ body {
 }
 
 .batik-corner-top-left {
-  top: -50px;
+  top: 0;
   left: -50px;
   background-position: top left;
 }
 
 .batik-corner-top-right {
-  top: -50px;
+  top: 0;
   right: -50px;
   background-position: top right;
   transform: scaleX(-1);
@@ -385,12 +385,12 @@ body {
 }
 
 .batik-accent-tl {
-  top: 100px;
+  top: 0;
   left: 100px;
 }
 
 .batik-accent-tr {
-  top: 100px;
+  top: 0;
   right: 100px;
   transform: scaleX(-1);
 }

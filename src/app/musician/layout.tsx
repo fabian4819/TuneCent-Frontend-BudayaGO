@@ -1,16 +1,29 @@
-import React from "react";
+"use client";
+
+import React, { useState } from "react";
 import SideBar from "../components/SideBar";
-import ProfileRow from "../components/dashboard/ProfileRow";
+import Navbar from "../components/Navbar";
 
 const MusicianLayout = ({ children }: { children: React.ReactNode }) => {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
   return (
-    <section className="bg-black w-full min-h-screen pt-[8vw]">
-      <SideBar />
-      <div className="ml-[17.222vw] w-[calc(100vw-17.222vw)] flex flex-col px-[2.222vw] py-[1.111vw] gap-[1.111vw]">
-        <div className="w-full">
-          <ProfileRow userRole="Creator" />
+    <section className="bg-black w-full min-h-screen pt-[var(--nav-h)]">
+      <Navbar
+        onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+        showHamburger={true}
+        userRole="Creator"
+      />
+      <SideBar
+        variant="musician"
+        isOpen={isSidebarOpen}
+        onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
+      />
+
+      <div className="w-full flex flex-row justify-center pt-[2.222vw]">
+        <div className="w-[80vw] flex flex-col">
+          {children}
         </div>
-        <div className="">{children}</div>
       </div>
     </section>
   );

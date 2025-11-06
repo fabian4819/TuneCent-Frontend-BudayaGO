@@ -6,7 +6,7 @@ import YourPath from "@/app/components/music/YourPath";
 
 const MusicPage = () => {
   return (
-    <section className="w-[75vw] flex flex-col bg-black gap-[1.667vw]">
+    <section className="w-full flex flex-col bg-black gap-[1.667vw]">
       <p className="font-jakarta font-bold text-white text-[1.667vw]">
         Your Music Trends
       </p>

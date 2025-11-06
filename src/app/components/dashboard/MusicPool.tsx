@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import Image from "next/image";
 import MusicPoolCard from "./MusicPoolCard";
 import { RiArrowRightUpLine } from "@remixicon/react";
 import { FiSkipBack, FiSkipForward } from "react-icons/fi";
@@ -235,7 +236,20 @@ const MusicPool = ({
       togglePlayPause();
     } else {
       setActiveSong(music);
+      setIsProfileExpanded(true); // Show artist profile when playing
     }
+  };
+
+  // Handle close/stop music
+  const handleClosePlayer = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+    setActiveSong(null);
+    setActiveSongId(null);
+    setIsPlaying(false);
+    setProgress(0);
   };
 
   // Format detik → menit:detik
@@ -295,17 +309,20 @@ const MusicPool = ({
                       {music.musicTitle}
                     </p>
                     <p className="text-[var(--color-emas-nusantara)] font-jakarta text-[0.833vw] font-regular">
-                      Ditutup: {formatCloseTime(music.musicCloseHour)}
+                      {music.musicArtist}
                     </p>
                   </div>
                   <button
+                    type="button"
+                    aria-label="Lihat detail lagu"
+                    title="Lihat detail"
                     onClick={() => {
                       setActiveSong(music);
                       setIsProfileExpanded(true);
                     }}
-                    className="cursor-pointer w-[1.667vw] aspect-[24/24] flex justify-center bg-[var(--color-coklat-jati)] rounded-[1.042vw] hover:bg-[var(--color-emas-nusantara)] transition-colors"
+                    className="cursor-pointer w-[2.5vw] h-[2.5vw] min-w-[36px] min-h-[36px] flex items-center justify-center rounded-full bg-[var(--color-coklat-jati)] hover:bg-[var(--color-emas-nusantara)] transition-transform hover:scale-105 shadow-wayang"
                   >
-                    <RiArrowRightUpLine color="var(--color-krem-lontar)" size={24} />
+                    <RiArrowRightUpLine color="var(--color-krem-lontar)" size={20} />
                   </button>
                 </div>
 
@@ -356,10 +373,23 @@ const MusicPool = ({
 
       {/* Tampilkan bar lagu di bawah layar */}
       {activeSong && (
-        <div className="fixed z-[20] bottom-0 left-0 w-full aspect-[1440/96] bg-[var(--color-hitam-ebony)] border-t border-[var(--color-coklat-jati)] px-[2vw] flex flex-row justify-between items-center">
+        <div className="fixed z-[20] bottom-0 left-0 w-full aspect-[1440/96] bg-[var(--color-hitam-ebony)] border-t-2 border-[var(--color-coklat-jati)] px-[2vw] flex flex-row justify-between items-center shadow-[0_-4px_12px_rgba(0,0,0,0.5)]">
           <div className="w-full flex flex-row justify-between items-center">
             <div className="w-[18.472vw] flex flex-row gap-[1.111vw] items-center">
-              <div className="w-[3.75vw] aspect-[1/1] bg-neutral-black-base"></div>
+              {/* Album Cover Image */}
+              <div className="w-[3.75vw] aspect-[1/1] rounded-[0.4vw] overflow-hidden border-2 border-[var(--color-coklat-jati)] relative">
+                {activeSong.coverImageUrl ? (
+                  <Image
+                    src={activeSong.coverImageUrl}
+                    alt={activeSong.musicTitle}
+                    fill
+                    className="object-cover"
+                    unoptimized
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-[var(--color-coklat-jati)] to-[var(--color-emas-nusantara)]" />
+                )}
+              </div>
               <div className="flex flex-col text-white">
                 <p className="text-[1vw] font-bold font-jakarta text-[var(--color-krem-lontar)]">{activeSong.musicTitle}</p>
                 <p className="text-[0.8vw] text-[var(--color-emas-nusantara)] font-jakarta">
@@ -371,11 +401,21 @@ const MusicPool = ({
               <div className="flex flex-row gap-[1.111vw] w- items-center">
                 <FiSkipBack size={20} color={"var(--color-coklat-jati)"} />
                 {isPlaying ? (
-                  <button onClick={togglePlayPause} className="cursor-pointer">
+                  <button
+                    onClick={togglePlayPause}
+                    className="cursor-pointer"
+                    aria-label="Jeda"
+                    title="Jeda"
+                  >
                     <FaPauseCircle size={36} color={"var(--color-emas-nusantara)"} />
                   </button>
                 ) : (
-                  <button onClick={togglePlayPause} className="cursor-pointer">
+                  <button
+                    onClick={togglePlayPause}
+                    className="cursor-pointer"
+                    aria-label="Putar"
+                    title="Putar"
+                  >
                     <FaPlayCircle size={36} color={"var(--color-emas-nusantara)"} />
                   </button>
                 )}
@@ -387,19 +427,39 @@ const MusicPool = ({
                 <span className="text-[var(--color-krem-lontar)] text-[0.7vw] font-jakarta">
                   {formatTime(progress)}
                 </span>
-                <div className="relative w-full h-[0.4vw] bg-[var(--color-coklat-jati)]/30 rounded-full">
-                  <div
-                    className="absolute left-0 top-0 h-full bg-gradient-to-r from-[var(--color-merah-kebangsaan)] to-[var(--color-emas-nusantara)] rounded-full"
-                    style={{ width: `${(progress / duration) * 100}%` }}
-                  ></div>
-                </div>
+                <progress
+                  className="w-full h-[0.4vw] rounded-full overflow-hidden [&::-webkit-progress-bar]:bg-[var(--color-coklat-jati)]/30 [&::-webkit-progress-value]:bg-[var(--color-emas-nusantara)] [&::-moz-progress-bar]:bg-[var(--color-emas-nusantara)]"
+                  max={Math.max(1, Math.floor(duration))}
+                  value={Math.min(Math.floor(progress), Math.max(1, Math.floor(duration)))}
+                  aria-label="Kemajuan pemutaran"
+                />
                 <span className="text-[var(--color-krem-lontar)] text-[0.7vw] font-jakarta">
                   {formatTime(duration)}
                 </span>
               </div>
             </div>
             <div className="flex flex-row gap-[1vw] items-center">
-              <div className="text-white text-[0.9vw] w-[6vw] aspect-square bg-black"></div>
+              {/* Close Button */}
+              <button
+                onClick={handleClosePlayer}
+                className="cursor-pointer w-[2.5vw] h-[2.5vw] flex items-center justify-center rounded-full bg-[var(--color-coklat-jati)]/50 hover:bg-[var(--color-merah-kebangsaan)] transition-colors border border-[var(--color-coklat-jati)]"
+                aria-label="Tutup pemutar"
+                title="Tutup dan hentikan musik"
+              >
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="var(--color-krem-lontar)"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
             </div>
           </div>
         </div>

@@ -52,7 +52,7 @@ const UserSettingsPage = () => {
   }
 
   return (
-    <section className="flex flex-col w-[75vw] gap-[2.222vw]">
+    <section className="flex flex-col w-full gap-[2.222vw]">
       <h1 className="text-white font-jakarta font-bold text-[2.222vw]">
         Settings
       </h1>

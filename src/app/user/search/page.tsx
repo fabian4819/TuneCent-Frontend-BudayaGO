@@ -13,7 +13,7 @@ const UserSearchPage = () => {
   };
 
   return (
-    <section className="flex flex-col w-[75vw] gap-[2.222vw]">
+    <section className="flex flex-col w-full gap-[2.222vw]">
       <div className="flex flex-col gap-[1.111vw]">
         <h1 className="text-white font-jakarta font-bold text-[2.222vw]">
           Search
