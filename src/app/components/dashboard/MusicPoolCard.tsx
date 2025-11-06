@@ -41,7 +41,17 @@ const MusicPoolCard = ({
             )}
           </button>
         )}
-        <div className="bg-black-lighter aspect-[192/177] flex flex-row-reverse p-[0.111vw] relative overflow-hidden">
+        <div className="bg-black-lighter aspect-[192/177] flex flex-row-reverse p-[0.111vw] relative overflow-hidden border-2 border-[var(--color-coklat-jati)] rounded-[0.556vw]">
+          {/* Batik Pattern Overlay */}
+          <div
+            className="absolute inset-0 opacity-10 pointer-events-none z-[1]"
+            style={{
+              backgroundImage: "url('/assets/patterns/kawung-pattern.svg')",
+              backgroundSize: "cover",
+              backgroundPosition: "center"
+            }}
+          />
+
           {coverImageUrl && (
             <Image
               src={coverImageUrl}
@@ -52,10 +62,10 @@ const MusicPoolCard = ({
             />
           )}
           <div className="flex flex-row gap-[0.333vw] p-[0.556vw] relative z-10">
-            <div className="w-[1.5vw] bg-white h-[1.5vw] rounded-full flex items-center justify-center">
+            <div className="w-[1.5vw] bg-[var(--color-emas-nusantara)] h-[1.5vw] rounded-full flex items-center justify-center border border-[var(--color-coklat-jati)]">
               <FaSpotify size={18} color="#1DB954" />
             </div>
-            <div className="w-[1.5vw] bg-white h-[1.5vw] rounded-full flex items-center justify-center">
+            <div className="w-[1.5vw] bg-[var(--color-emas-nusantara)] h-[1.5vw] rounded-full flex items-center justify-center border border-[var(--color-coklat-jati)]">
               <FaYoutube size={18} color="#FF0000" />
             </div>
           </div>

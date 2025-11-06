@@ -1,4 +1,5 @@
 "use client";
+import NusantaraIcon from "../common/NusantaraIcon";
 
 interface LeaderboardArrayProps {
   rank: number;
@@ -101,8 +102,17 @@ const Leaderboard = ({ category = "Artist" }: LeaderboardProps) => {
   };
 
   return (
-    <div className="nusantara-card flex flex-col w-[36.667vw] aspect-[528/268] p-[1.111vw] rounded-[0.486vw] gap-[0.556vw] shadow-wayang">
-      <div className="w-full flex flex-row items-center justify-between pb-[0.667vw] border-b-[0.069vw] border-[var(--color-coklat-jati)]">
+    <div className="nusantara-card flex flex-col w-[36.667vw] aspect-[528/268] p-[1.111vw] rounded-[0.486vw] gap-[0.556vw] shadow-wayang border-ukiran relative overflow-hidden">
+      {/* Subtle Kawung Pattern Background */}
+      <div
+        className="absolute inset-0 opacity-[0.03] pointer-events-none"
+        style={{
+          backgroundImage: "url('/assets/patterns/kawung-pattern.svg')",
+          backgroundSize: "150px",
+          backgroundRepeat: "repeat"
+        }}
+      />
+      <div className="w-full flex flex-row items-center justify-between pb-[0.667vw] border-b-[0.069vw] border-[var(--color-coklat-jati)] relative z-[1]">
         <p className="text-[var(--color-emas-nusantara)] text-[1.389vw] font-jakarta font-bold">
           Papan Peringkat - Top {getCategoryIndonesian()}
         </p>
@@ -114,7 +124,7 @@ const Leaderboard = ({ category = "Artist" }: LeaderboardProps) => {
         </button>
       </div>
       {category === "Musician" ? (
-        <div className="flex flex-col w-full aspect-[481/180] p-[0.333vw] gap-[0.333vw]">
+        <div className="flex flex-col w-full aspect-[481/180] p-[0.333vw] gap-[0.333vw] relative z-[1]">
           {LeaderboardMusisiArray.map((leaderboardKey) => (
             <div
               key={leaderboardKey.rank}
@@ -156,7 +166,7 @@ const Leaderboard = ({ category = "Artist" }: LeaderboardProps) => {
           ))}
         </div>
       ) : category === "Artist" ? (
-        <div className="flex flex-col w-full aspect-[481/180] p-[0.333vw] gap-[0.333vw]">
+        <div className="flex flex-col w-full aspect-[481/180] p-[0.333vw] gap-[0.333vw] relative z-[1]">
           {LeaderboardArtistArray.map((leaderboardKey) => (
             <div
               key={leaderboardKey.rank}
@@ -165,9 +175,14 @@ const Leaderboard = ({ category = "Artist" }: LeaderboardProps) => {
               {leaderboardKey.isTopProfile ? (
                 <div className="w-full flex flex-row justify-between items-center">
                   <div className="flex flex-row items-center gap-[0.667vw] font-jakarta text-[var(--color-krem-lontar)]">
-                    <p className="text-[1.667vw] font-bold text-[var(--color-emas-nusantara)]">
-                      {leaderboardKey.rank}
-                    </p>
+                    <div className="relative">
+                      <p className="text-[1.667vw] font-bold text-[var(--color-emas-nusantara)]">
+                        {leaderboardKey.rank}
+                      </p>
+                      <div className="absolute -top-1 -right-2">
+                        <NusantaraIcon icon="mahkota-crown" size={16} />
+                      </div>
+                    </div>
                     <div className="flex flex-col gap-[0.111vw]">
                       <p className="text-[1.389vw] font-bold">
                         {leaderboardKey.artist}
@@ -193,7 +208,7 @@ const Leaderboard = ({ category = "Artist" }: LeaderboardProps) => {
           ))}
         </div>
       ) : (
-        <div className="flex flex-col w-full aspect-[481/180] p-[0.333vw] gap-[0.333vw]">
+        <div className="flex flex-col w-full aspect-[481/180] p-[0.333vw] gap-[0.333vw] relative z-[1]">
           {LeaderboardMusicArray.map((leaderboardKey) => (
             <div
               key={leaderboardKey.rank}
@@ -202,9 +217,14 @@ const Leaderboard = ({ category = "Artist" }: LeaderboardProps) => {
               {leaderboardKey.isTopProfile ? (
                 <div className="w-full flex flex-row justify-between items-center">
                   <div className="flex flex-row items-center gap-[0.667vw] font-jakarta text-[var(--color-krem-lontar)]">
-                    <p className="text-[1.667vw] font-bold text-[var(--color-emas-nusantara)]">
-                      {leaderboardKey.rank}
-                    </p>
+                    <div className="relative">
+                      <p className="text-[1.667vw] font-bold text-[var(--color-emas-nusantara)]">
+                        {leaderboardKey.rank}
+                      </p>
+                      <div className="absolute -top-1 -right-2">
+                        <NusantaraIcon icon="mahkota-crown" size={16} />
+                      </div>
+                    </div>
                     <div className="flex flex-col gap-[0.111vw]">
                       <p className="text-[1.389vw] font-bold">
                         {leaderboardKey.artist}

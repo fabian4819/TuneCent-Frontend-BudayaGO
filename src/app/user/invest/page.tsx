@@ -108,14 +108,36 @@ const InvestPage = () => {
   }, [totalCampaigns]);
 
   return (
-    <section className="w-[75vw] flex flex-col bg-black gap-[1.667vw]">
-      <div className="w-full flex flex-row justify-between">
+    <section className="w-[75vw] flex flex-col bg-black gap-[1.667vw] relative">
+      {/* Animated Top & Bottom Pattern Borders */}
+      <div className="batik-top-border" />
+      <div className="batik-bottom-border" />
+
+      {/* Animated Corner Patterns - Stay in Corners */}
+      <div className="batik-corner-pattern batik-corner-top-left" />
+      <div className="batik-corner-pattern batik-corner-top-right" />
+      <div className="batik-corner-pattern batik-corner-bottom-left" />
+      <div className="batik-corner-pattern batik-corner-bottom-right" />
+
+      {/* Animated Side Borders */}
+      <div className="batik-side-border batik-left-border" />
+      <div className="batik-side-border batik-right-border" />
+
+      {/* Floating Accent Patterns - Small Corner Accents */}
+      <div className="batik-floating-accent batik-accent-tl" />
+      <div className="batik-floating-accent batik-accent-tr" />
+      <div className="batik-floating-accent batik-accent-bl" />
+      <div className="batik-floating-accent batik-accent-br" />
+
+      <div className="w-full flex flex-row justify-between relative z-[1]">
         <p className="font-jakarta font-bold text-[var(--color-emas-nusantara)] text-[1.667vw]">
           Selalu Dukung Artis Anda
         </p>
       </div>
-      <ContributorPath {...contributorPathData} />
-      <div className="flex flex-col w-full p-[1.111vw] gap-[0.667vw]">
+      <div className="relative z-[1]">
+        <ContributorPath {...contributorPathData} />
+      </div>
+      <div className="flex flex-col w-full p-[1.111vw] gap-[0.667vw] relative z-[1]">
         <p className="font-jakarta font-bold text-[var(--color-emas-nusantara)] text-[1.389vw]">
           Penawaran Spesial untuk Anda
         </p>

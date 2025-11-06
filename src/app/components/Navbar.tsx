@@ -15,8 +15,17 @@ const Navbar = () => {
   };
 
   return (
-    <div className="fixed top-0 left-0 w-[100vw] h-[6.667vw] flex flex-row justify-center p-[1.667vw] bg-[#0A0A0A] z-50">
-      <div className="w-[80vw] flex flex-row justify-between">
+    <div className="fixed top-0 left-0 w-full h-[var(--nav-h)] flex flex-row justify-center p-[1.667vw] bg-[#0A0A0A] z-[100] border-b-2 border-[var(--color-coklat-jati)]/30 overflow-hidden">
+      {/* Subtle Batik Background */}
+      <div
+        className="absolute inset-0 opacity-5 pointer-events-none"
+        style={{
+          backgroundImage: "url('/assets/patterns/songket-pattern.svg')",
+          backgroundSize: "200px",
+          backgroundRepeat: "repeat"
+        }}
+      />
+      <div className="w-[80vw] flex flex-row justify-between relative z-10">
         <div className="flex flex-row items-center gap-[0.833vw]">
           <Image
             src="/assets/logo.png"

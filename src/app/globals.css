@@ -3,6 +3,8 @@
 :root {
   --background: #FFFEF7;
   --foreground: #1A0F0F;
+  /* Unified navbar height for layout spacing */
+  --nav-h: 6.667vw;
 }
 
 @theme inline {
@@ -222,6 +224,187 @@ body {
 /* Smooth Transitions */
 .transition-nusantara {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Gorga Divider - Horizontal Pattern Border */
+.divider-gorga {
+  width: 100%;
+  height: 16px; /* Thicker for visibility */
+  background-image: url('/assets/patterns/gorga-batak.svg');
+  background-size: auto 100%;
+  background-repeat: repeat-x;
+  background-position: center;
+  opacity: 0.85;
+  filter: drop-shadow(0 2px 4px rgba(212, 175, 55, 0.4)) brightness(1.15);
+  margin: 2rem 0;
+}
+
+/* Batik Background Overlay Utilities - HIGH CONTRAST */
+.bg-batik-overlay {
+  position: relative;
+}
+
+.bg-batik-overlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url('/assets/patterns/kawung-pattern.svg');
+  background-size: 1000px; /* Even larger */
+  opacity: 0.4; /* Higher contrast */
+  pointer-events: none;
+  z-index: 0;
+  filter: contrast(1.3) brightness(1.1); /* Enhanced visibility */
+}
+
+.bg-songket-overlay {
+  position: relative;
+}
+
+.bg-songket-overlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url('/assets/patterns/songket-pattern.svg');
+  background-size: 900px; /* Even larger */
+  opacity: 0.45; /* Higher contrast */
+  pointer-events: none;
+  z-index: 0;
+  filter: contrast(1.3) brightness(1.1); /* Enhanced visibility */
+}
+
+/* Static Corner Batik Patterns - USING ELEMENT-BATIK.PNG */
+.batik-corner-pattern {
+  position: absolute;
+  width: 450px;
+  height: 450px;
+  background-image: url('/assets/patterns/element-batik.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  opacity: 0.55;
+  pointer-events: none;
+  filter: contrast(1.2) brightness(1.05) drop-shadow(0 4px 8px rgba(212, 175, 55, 0.3));
+}
+
+.batik-corner-top-left {
+  top: -50px;
+  left: -50px;
+  background-position: top left;
+}
+
+.batik-corner-top-right {
+  top: -50px;
+  right: -50px;
+  background-position: top right;
+  transform: scaleX(-1);
+}
+
+.batik-corner-bottom-left {
+  bottom: -50px;
+  left: -50px;
+  background-position: bottom left;
+  transform: rotate(-90deg);
+}
+
+.batik-corner-bottom-right {
+  bottom: -50px;
+  right: -50px;
+  background-position: bottom right;
+  transform: rotate(180deg);
+}
+
+/* Static Side Borders with Patterns */
+.batik-side-border {
+  position: absolute;
+  width: 150px;
+  height: 100%;
+  background-repeat: repeat-y;
+  background-size: 150px auto;
+  opacity: 0.35;
+  pointer-events: none;
+  filter: contrast(1.2) brightness(1.05);
+}
+
+.batik-left-border {
+  left: 0;
+  top: 0;
+  background-image: url('/assets/patterns/kawung-pattern.svg');
+}
+
+.batik-right-border {
+  right: 0;
+  top: 0;
+  background-image: url('/assets/patterns/songket-pattern.svg');
+}
+
+/* Static Top & Bottom Pattern Borders */
+.batik-top-border {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 120px;
+  background-image: url('/assets/patterns/batik-mega-mendung.svg');
+  background-size: 1000px auto;
+  background-position: center top;
+  background-repeat: repeat-x;
+  opacity: 0.4;
+  pointer-events: none;
+  filter: contrast(1.3) brightness(1.1);
+  mask-image: linear-gradient(to bottom, black 0%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 0%, transparent 100%);
+}
+
+.batik-bottom-border {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 120px;
+  background-image: url('/assets/patterns/songket-pattern.svg');
+  background-size: 1000px auto;
+  background-position: center bottom;
+  background-repeat: repeat-x;
+  opacity: 0.4;
+  pointer-events: none;
+  filter: contrast(1.3) brightness(1.1);
+  mask-image: linear-gradient(to top, black 0%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to top, black 0%, transparent 100%);
+}
+
+/* Static Floating Accent Patterns - Small Element-Batik */
+.batik-floating-accent {
+  position: absolute;
+  width: 280px;
+  height: 280px;
+  background-image: url('/assets/patterns/element-batik.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  opacity: 0.35;
+  pointer-events: none;
+  filter: drop-shadow(0 2px 6px rgba(212, 175, 55, 0.2));
+}
+
+.batik-accent-tl {
+  top: 100px;
+  left: 100px;
+}
+
+.batik-accent-tr {
+  top: 100px;
+  right: 100px;
+  transform: scaleX(-1);
+}
+
+.batik-accent-bl {
+  bottom: 100px;
+  left: 100px;
+  transform: rotate(-90deg);
+}
+
+.batik-accent-br {
+  bottom: 100px;
+  right: 100px;
+  transform: rotate(180deg);
 }
 
 /* Border with Ukiran (Carving) Style */

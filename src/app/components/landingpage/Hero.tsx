@@ -1,19 +1,15 @@
 "use client";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import NusantaraIcon from "../common/NusantaraIcon";
 
 const Hero = () => {
   const router = useRouter();
 
   return (
-    <section className="w-full flex flex-col gap-[1.528vw] justify-center items-center relative">
-      {/* Background Batik Mega Mendung - Indonesian Traditional Pattern */}
-      <div className="absolute inset-0 w-full h-full pointer-events-none overflow-hidden opacity-20">
-        <div className="bg-batik-mega-mendung w-full h-full" />
-      </div>
-
+    <section className="w-full flex flex-col gap-[1.528vw] justify-center items-center relative min-h-[60vh] py-[4vw]">
       {/* Gradient Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black via-transparent to-black opacity-60 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/40 pointer-events-none" />
 
       {/* Content */}
       <div className="flex flex-col w-[68vw] text-center relative z-10">
@@ -36,8 +32,9 @@ const Hero = () => {
           onClick={() => {
             router.push("/user/home");
           }}
-          className="btn-secondary-nusantara cursor-pointer w-[16.25vw] flex flex-row justify-center items-center transition-nusantara hover:scale-105"
+          className="btn-secondary-nusantara cursor-pointer w-[16.25vw] flex flex-row justify-center items-center gap-[0.5vw] transition-nusantara hover:scale-105"
         >
+          <NusantaraIcon icon="angklung-note" size={20} />
           <p className="text-[0.972vw] font-jakarta font-semibold">
             Temukan Musik
           </p>
@@ -46,8 +43,9 @@ const Hero = () => {
           onClick={() => {
             router.push("/musician/dashboard");
           }}
-          className="btn-primary-nusantara cursor-pointer w-[16.25vw] flex flex-row justify-center items-center"
+          className="btn-primary-nusantara cursor-pointer w-[16.25vw] flex flex-row justify-center items-center gap-[0.5vw]"
         >
+          <NusantaraIcon icon="gamelan-icon" size={20} />
           <p className="text-[0.972vw] font-jakarta font-semibold">
             Mulai Berkarya
           </p>

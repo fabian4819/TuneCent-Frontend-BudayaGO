@@ -21,9 +21,18 @@ const TotalDana = () => {
   const mockEthAmount = 4.2156;
 
   return (
-    <div className="w-[38.194vw] flex flex-col justify-between bg-black rounded-[1.042vw] p-[1.883vw]">
-      <div className="flex flex-col gap-[0.111vw]">
-        <p className="text-[1.333vw] font-jakarta text-white">Total Value</p>
+    <div className="w-[38.194vw] flex flex-col justify-between bg-black rounded-[1.042vw] p-[1.883vw] border-2 border-[var(--color-coklat-jati)]/30 shadow-wayang relative overflow-hidden">
+      {/* Batik Overlay */}
+      <div
+        className="absolute inset-0 opacity-[0.03] pointer-events-none"
+        style={{
+          backgroundImage: "url('/assets/patterns/songket-pattern.svg')",
+          backgroundSize: "200px",
+          backgroundRepeat: "repeat"
+        }}
+      />
+      <div className="flex flex-col gap-[0.111vw] relative z-[1]">
+        <p className="text-[1.333vw] font-jakarta text-[var(--color-emas-nusantara)]">Total Nilai</p>
         <div className="w-full flex flex-row gap-[1.333vw]">
           <p className="text-[2.222vw] text-white font-[700] font-jakarta">
             ${mockTotalValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -43,7 +52,7 @@ const TotalDana = () => {
           </div>
         </div>
       </div>
-      <div>
+      <div className="relative z-[1]">
         <DanaChart />
       </div>
     </div>
