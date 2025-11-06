@@ -24,8 +24,8 @@ const jakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "TuneCent",
-  description: "Decentralized music crowdfunding platform powered by blockchain",
+  title: "TuneCent - BudayaGO",
+  description: "Platform crowdfunding musik tradisional Indonesia berbasis blockchain. Dukung musisi lokal, lestarikan budaya Nusantara, dan dapatkan royalti dari lagu favorit Anda.",
 };
 
 export default function RootLayout({
