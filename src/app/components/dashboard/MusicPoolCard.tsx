@@ -1,7 +1,9 @@
-import { useState } from "react";
+"use client";
+import { useState, useEffect } from "react";
 import { FaCirclePlay } from "react-icons/fa6";
 import { FaPauseCircle, FaSpotify, FaYoutube } from "react-icons/fa";
 import Image from "next/image";
+import { loadMediaFromReference, isIndexedDBReference } from "@/app/utils/indexedDB";
 
 interface MusicPoolCardProps {
   onClickPlay?: () => void;
@@ -17,6 +19,23 @@ const MusicPoolCard = ({
   coverImageUrl,
 }: MusicPoolCardProps) => {
   const [isHovered, setIsHovered] = useState<boolean>(false);
+  const [displayCoverUrl, setDisplayCoverUrl] = useState<string | undefined>(coverImageUrl);
+
+  // Load cover image from IndexedDB if needed
+  useEffect(() => {
+    const loadCoverImage = async () => {
+      if (coverImageUrl && isIndexedDBReference(coverImageUrl)) {
+        const loadedUrl = await loadMediaFromReference(coverImageUrl);
+        if (loadedUrl) {
+          setDisplayCoverUrl(loadedUrl);
+        }
+      } else {
+        setDisplayCoverUrl(coverImageUrl);
+      }
+    };
+
+    loadCoverImage();
+  }, [coverImageUrl]);
 
   const hoveringAndPlay = (hovering: boolean, playing: boolean) => {
     if (!playing) setIsHovered(false);
@@ -52,9 +71,9 @@ const MusicPoolCard = ({
             }}
           />
 
-          {coverImageUrl && (
+          {displayCoverUrl && (
             <Image
-              src={coverImageUrl}
+              src={displayCoverUrl}
               alt="Album cover"
               fill
               className="object-cover"

@@ -9,12 +9,9 @@ import { FaPauseCircle, FaPlayCircle } from "react-icons/fa";
 import ArtistProfileExpanded from "./ArtistProfileExpanded";
 import CreateCampaignModal from "./CreateCampaignModal";
 import { listMusic, MusicData } from "@/app/services/musicApi";
-import { useAccount } from "wagmi";
-import {
-  useCrowdfundingPool,
-  useGetCampaignByToken,
-} from "@/app/hooks/useCrowdfundingPool";
-import { getLocalMusic } from "@/app/utils/localStorage";
+import { usePrivy } from "@privy-io/react-auth";
+import { getLocalMusic, savePlayHistory, generateId } from "@/app/utils/localStorage";
+import { loadMediaFromReference, isIndexedDBReference } from "@/app/utils/indexedDB";
 
 interface MusicPoolProps {
   title?: string;
@@ -23,7 +20,7 @@ interface MusicPoolProps {
 }
 
 interface MusicProps {
-  musicId: number;
+  musicId: number | string;
   musicTitle: string;
   musicCloseHour: number;
   musicOnClick: () => void;
@@ -96,8 +93,8 @@ const MusicPool = ({
   title = "Your Top Song",
   showCampaignButton = false,
 }: MusicPoolProps) => {
-  const { isConnected } = useAccount();
-  const [activeSongId, setActiveSongId] = useState<number | null>(null);
+  const { authenticated, user } = usePrivy();
+  const [activeSongId, setActiveSongId] = useState<number | string | null>(null);
   const [activeSong, setActiveSong] = useState<MusicProps | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -108,6 +105,7 @@ const MusicPool = ({
   const [selectedMusicForCampaign, setSelectedMusicForCampaign] =
     useState<MusicProps | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const playStartTimeRef = useRef<number>(0); // Track when play started
 
   // Generate random closing hours
   const generateRandomCloseHour = () => {
@@ -122,7 +120,7 @@ const MusicPool = ({
         // Get localStorage music
         const localMusic = getLocalMusic();
         const transformedLocalMusic: MusicProps[] = localMusic.map((music) => ({
-          musicId: parseInt(music.id.replace('local-', '')),
+          musicId: music.id, // Keep original string ID from localStorage
           musicTitle: music.title,
           musicCloseHour: generateRandomCloseHour(),
           musicArtist: music.artist,
@@ -149,8 +147,12 @@ const MusicPool = ({
           })
         );
 
-        // Merge: localStorage music first, then backend music
-        const mergedMusic = [...transformedLocalMusic, ...transformedBackendMusic];
+        // Merge: localStorage music first (newest), then backend, then dummy
+        const mergedMusic = [
+          ...transformedLocalMusic,
+          ...transformedBackendMusic,
+          ...DummyMusic
+        ];
         setMusicList(mergedMusic.slice(0, 5)); // Limit to 5 songs
       } catch (error) {
         console.error("Failed to fetch music:", error);
@@ -158,7 +160,7 @@ const MusicPool = ({
         const localMusic = getLocalMusic();
         if (localMusic.length > 0) {
           const transformedLocalMusic: MusicProps[] = localMusic.map((music) => ({
-            musicId: parseInt(music.id.replace('local-', '')),
+            musicId: music.id, // Keep original string ID
             musicTitle: music.title,
             musicCloseHour: generateRandomCloseHour(),
             musicArtist: music.artist,
@@ -167,9 +169,10 @@ const MusicPool = ({
             coverImageUrl: music.coverImageUrl,
             genre: music.genre,
           }));
-          setMusicList(transformedLocalMusic);
+          // Merge with dummy data
+          setMusicList([...transformedLocalMusic, ...DummyMusic].slice(0, 5));
         }
-        // Keep using dummy data if both fail
+        // Keep using dummy data if localStorage is also empty
       }
     };
 
@@ -182,41 +185,106 @@ const MusicPool = ({
         audioRef.current.pause();
       }
 
-      const audio = new Audio(activeSong.musicUrl);
-      audioRef.current = audio;
+      const loadAndPlayAudio = async () => {
+        try {
+          console.log('Loading audio:', activeSong.musicTitle);
+          console.log('Audio URL/Reference:', activeSong.musicUrl.substring(0, 50) + '...');
+          
+          // Check if this is an IndexedDB reference
+          let audioUrl = activeSong.musicUrl;
+          if (isIndexedDBReference(activeSong.musicUrl)) {
+            console.log('Loading from IndexedDB...');
+            const loadedUrl = await loadMediaFromReference(activeSong.musicUrl);
+            if (!loadedUrl) {
+              console.error('Failed to load audio from IndexedDB');
+              alert(`Tidak dapat memuat "${activeSong.musicTitle}". File audio tidak ditemukan.`);
+              setIsPlaying(false);
+              return;
+            }
+            audioUrl = loadedUrl;
+            console.log('Audio loaded from IndexedDB successfully');
+          }
 
-      audio.addEventListener("loadedmetadata", () => {
-        setDuration(audio.duration);
-      });
+          const audio = new Audio(audioUrl);
+          audioRef.current = audio;
+          playStartTimeRef.current = Date.now(); // Track play start time
 
-      audio.addEventListener("timeupdate", () => {
-        setProgress(audio.currentTime);
-      });
+          audio.addEventListener("loadedmetadata", () => {
+            console.log('Audio loaded successfully, duration:', audio.duration);
+            setDuration(audio.duration);
+          });
 
-      audio.addEventListener("ended", () => {
-        setIsPlaying(false);
-        setProgress(0);
-      });
+          audio.addEventListener("timeupdate", () => {
+            setProgress(audio.currentTime);
+            
+            // Track play after 30 seconds (considered a valid play)
+            if (audio.currentTime >= 30 && authenticated && user?.id) {
+              const playDuration = (Date.now() - playStartTimeRef.current) / 1000;
+              if (playDuration >= 30) {
+                // Save play history once per session
+                savePlayHistory({
+                  id: generateId(),
+                  musicId: String(activeSong.musicId),
+                  musicTitle: activeSong.musicTitle,
+                  userId: user.id,
+                  playedAt: new Date().toISOString(),
+                  duration: audio.currentTime,
+                });
+                // Reset to avoid duplicate tracking
+                playStartTimeRef.current = Date.now() + 1000000; // Set far future
+              }
+            }
+          });
 
-      audio.addEventListener("error", (e) => {
-        console.error("Audio playback error:", e);
-        console.error("Failed to load audio from:", activeSong.musicUrl);
-        setIsPlaying(false);
-      });
+          audio.addEventListener("ended", () => {
+            setIsPlaying(false);
+            setProgress(0);
+            
+            // Track full play completion
+            if (authenticated && user?.id) {
+              savePlayHistory({
+                id: generateId(),
+                musicId: String(activeSong.musicId),
+                musicTitle: activeSong.musicTitle,
+                userId: user.id,
+                playedAt: new Date().toISOString(),
+                duration: audio.duration,
+              });
+            }
+          });
 
-      audio.play().catch((error) => {
-        console.error("Audio play failed:", error);
-        setIsPlaying(false);
-      });
+          audio.addEventListener("error", (e) => {
+            console.error("Audio playback error:", e);
+            console.error("Error details:", audio.error);
+            console.error("Failed to load audio:", activeSong.musicUrl.substring(0, 50));
+            console.error("Music title:", activeSong.musicTitle);
+            alert(`Tidak dapat memutar "${activeSong.musicTitle}". Format audio mungkin tidak didukung.`);
+            setIsPlaying(false);
+          });
 
-      setIsPlaying(true);
+          await audio.play().catch((error) => {
+            console.error("Audio play failed:", error);
+            console.error("Play error for:", activeSong.musicTitle);
+            setIsPlaying(false);
+          });
+
+          setIsPlaying(true);
+        } catch (error) {
+          console.error('Error in loadAndPlayAudio:', error);
+          setIsPlaying(false);
+        }
+      };
+
+      loadAndPlayAudio();
 
       return () => {
-        audio.pause();
-        audio.removeAttribute("src");
+        if (audioRef.current) {
+          audioRef.current.pause();
+          audioRef.current.removeAttribute("src");
+        }
       };
     }
-  }, [activeSong]);
+  }, [activeSong, authenticated, user]);
 
   const togglePlayPause = () => {
     if (!audioRef.current) return;
@@ -269,10 +337,6 @@ const MusicPool = ({
   };
 
   const handleCreateCampaign = (music: MusicProps) => {
-    if (!isConnected) {
-      alert("Mohon hubungkan dompet Anda untuk membuat kampanye");
-      return;
-    }
     setSelectedMusicForCampaign(music);
     setShowCampaignModal(true);
   };
@@ -358,7 +422,7 @@ const MusicPool = ({
       {/* Create Campaign Modal */}
       {showCampaignModal && selectedMusicForCampaign && (
         <CreateCampaignModal
-          tokenId={selectedMusicForCampaign.musicId}
+          musicId={String(selectedMusicForCampaign.musicId)}
           musicTitle={selectedMusicForCampaign.musicTitle}
           onClose={() => {
             setShowCampaignModal(false);
@@ -366,7 +430,7 @@ const MusicPool = ({
           }}
           onSuccess={() => {
             // Refresh music list or show success message
-            console.log("Campaign created successfully!");
+            console.log("Pool created successfully!");
           }}
         />
       )}

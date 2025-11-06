@@ -1,23 +1,14 @@
 "use client";
-import { useState, ChangeEvent, useEffect } from "react";
+import { useState, ChangeEvent } from "react";
 import Image from "next/image";
-import { useAccount } from "wagmi";
-import { useMusicRegistry } from "@/app/hooks/useMusicRegistry";
+import { usePrivy } from '@privy-io/react-auth';
 import TransactionSuccessModal from "@/app/components/common/TransactionSuccessModal";
 import { saveMusic, generateId } from "@/app/utils/localStorage";
+import { saveAudioFile, saveImageFile } from "@/app/utils/indexedDB";
 
 export default function CreateUploadForm() {
-  const { address, isConnected } = useAccount();
-  const {
-    registerMusic,
-    isRegistering,
-    isConfirming,
-    isConfirmed,
-    registerError,
-    transactionHash,
-  } = useMusicRegistry();
+  const { authenticated, user } = usePrivy();
 
-  const [creatorAddress, setCreatorAddress] = useState<string>("");
   const [title, setTitle] = useState<string>("");
   const [artist, setArtist] = useState<string>("");
   const [genre, setGenre] = useState<string>("");
@@ -25,8 +16,11 @@ export default function CreateUploadForm() {
   const [duration, setDuration] = useState<string>("");
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [audioUrl, setAudioUrl] = useState<string>("");
+  const [bannerFile, setBannerFile] = useState<File | null>(null);
   const [bannerURL, setBannerURL] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState<boolean>(false);
+  const [isProcessingAudio, setIsProcessingAudio] = useState<boolean>(false);
+  const [isProcessingBanner, setIsProcessingBanner] = useState<boolean>(false);
   const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false);
   const [successData, setSuccessData] = useState<{
     title: string;
@@ -35,17 +29,6 @@ export default function CreateUploadForm() {
     audioUrl: string;
     bannerUrl: string | null;
   } | null>(null);
-
-  // Update creator address when wallet connects
-  useEffect(() => {
-    if (address) {
-      setCreatorAddress(address);
-    }
-  }, [address]);
-
-  const handleCreatorAddress = (event: ChangeEvent<HTMLInputElement>) => {
-    setCreatorAddress(event.target.value);
-  };
 
   const handleTitle = (event: ChangeEvent<HTMLInputElement>) => {
     setTitle(event.target.value);
@@ -67,27 +50,54 @@ export default function CreateUploadForm() {
     setDuration(event.target.value);
   };
 
-  const handleAudioUpload = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleAudioUpload = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file && file.type.startsWith("audio/")) {
       setAudioFile(file);
-      setAudioUrl(URL.createObjectURL(file)); // buat URL sementara untuk preview
+      setIsProcessingAudio(true);
+      
+      try {
+        // Create preview URL (temporary, for preview only)
+        const previewUrl = URL.createObjectURL(file);
+        setAudioUrl(previewUrl);
+        
+        console.log('Audio file uploaded:', file.name, 'Size:', (file.size / 1024 / 1024).toFixed(2), 'MB');
+        setIsProcessingAudio(false);
+      } catch (error) {
+        console.error('Error processing audio:', error);
+        alert("Gagal memproses file audio. Mohon coba lagi.");
+        setIsProcessingAudio(false);
+      }
     } else {
       alert("Mohon unggah file audio yang valid (MP3/WAV).");
     }
   };
 
-  const handleBannerUpload = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleBannerUpload = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      setBannerURL(URL.createObjectURL(file));
+      setBannerFile(file);
+      setIsProcessingBanner(true);
+      
+      try {
+        // Create preview URL (temporary, for preview only)
+        const previewUrl = URL.createObjectURL(file);
+        setBannerURL(previewUrl);
+        
+        console.log('Banner image uploaded:', file.name, 'Size:', (file.size / 1024 / 1024).toFixed(2), 'MB');
+        setIsProcessingBanner(false);
+      } catch (error) {
+        console.error('Error processing banner:', error);
+        alert("Gagal memproses gambar banner. Mohon coba lagi.");
+        setIsProcessingBanner(false);
+      }
     }
   };
 
   const handleCreateKarya = async () => {
     // Validation
-    if (!isConnected) {
-      alert("Mohon hubungkan dompet Anda terlebih dahulu");
+    if (!authenticated) {
+      alert("Mohon login terlebih dahulu");
       return;
     }
 
@@ -99,72 +109,75 @@ export default function CreateUploadForm() {
     try {
       setIsUploading(true);
 
-      // 1. Upload audio file to IPFS (you'll need to implement this)
-      // For now, using a placeholder IPFS CID
-      const audioArrayBuffer = await audioFile.arrayBuffer();
+      // Get user ID for creator tracking
+      const userId = user?.id || "guest";
 
-      // TODO: Upload to actual IPFS
-      // const ipfsCID = await uploadToIPFS(audioFile, bannerFile, metadata);
-      const ipfsCID = "QmPlaceholder" + Date.now(); // Placeholder
+      // Convert duration MM:SS to seconds
+      let durationInSeconds = 180; // default 3 minutes
+      if (duration) {
+        const parts = duration.split(':');
+        if (parts.length === 2) {
+          durationInSeconds = parseInt(parts[0]) * 60 + parseInt(parts[1]);
+        }
+      }
 
-      // Save data before transaction
-      setSuccessData({
+      // Generate unique ID for this music
+      const musicId = generateId();
+
+      // Save audio file to IndexedDB and get reference
+      let audioReference = audioUrl;
+      if (audioFile) {
+        console.log('Saving audio file to IndexedDB...');
+        audioReference = await saveAudioFile(musicId, audioFile);
+        console.log('Audio saved with reference:', audioReference);
+      }
+
+      // Save banner image to IndexedDB if exists
+      let bannerReference = '/assets/default-cover.png';
+      if (bannerFile) {
+        console.log('Saving banner image to IndexedDB...');
+        bannerReference = await saveImageFile(musicId, bannerFile);
+        console.log('Banner saved with reference:', bannerReference);
+      }
+
+      // Save music metadata to localStorage with IndexedDB references
+      const musicData = {
+        id: musicId,
         title,
         artist,
-        genre,
-        audioUrl,
-        bannerUrl: bannerURL,
-      });
-
-      // 2. Register music on blockchain - this will open wallet modal
-      registerMusic(ipfsCID, title, artist, audioArrayBuffer);
-    } catch (error) {
-      console.error("Error creating music:", error);
-      // Only show error if user didn't reject in wallet
-      if (error && typeof error === 'object' && 'code' in error && error.code !== 4001) {
-        alert("Gagal mendaftarkan musik. Mohon coba lagi.");
-      }
-      setIsUploading(false);
-    }
-  };
-
-  // Watch for transaction hash - shows modal 3 seconds after user signs in wallet
-  useEffect(() => {
-    if (transactionHash && successData && address) {
-      // Save to localStorage
-      const musicData = {
-        id: generateId(),
-        title: successData.title,
-        artist: successData.artist,
-        genre: successData.genre,
-        description: description,
-        duration: duration ? parseInt(duration.replace(':', '')) : 180, // Convert MM:SS to seconds or default
-        coverImageUrl: successData.bannerUrl || '/assets/default-cover.png',
-        audioFileUrl: successData.audioUrl,
-        creatorAddress: address,
-        txHash: transactionHash,
+        genre: genre || "General",
+        description: description || "",
+        duration: durationInSeconds,
+        coverImageUrl: bannerReference,
+        audioFileUrl: audioReference, // This is the IndexedDB reference
+        creatorAddress: userId,
         createdAt: new Date().toISOString(),
       };
 
       saveMusic(musicData);
-      console.log('Music saved to localStorage:', musicData);
+      console.log('Music saved to localStorage with IndexedDB reference:', musicData);
 
-      const timer = setTimeout(() => {
+      // Set success data for modal
+      setSuccessData({
+        title,
+        artist,
+        genre: genre || "General",
+        audioUrl,
+        bannerUrl: bannerURL,
+      });
+
+      // Show success modal after short delay
+      setTimeout(() => {
         setShowSuccessModal(true);
         setIsUploading(false);
-      }, 3000); // 3 second delay
+      }, 500);
 
-      return () => clearTimeout(timer);
-    }
-  }, [transactionHash, successData, address, description, duration]);
-
-  // Show error message
-  useEffect(() => {
-    if (registerError) {
-      alert(`Error: ${registerError.message}`);
+    } catch (error) {
+      console.error("Error creating music:", error);
+      alert("Gagal mendaftarkan musik. Mohon coba lagi.");
       setIsUploading(false);
     }
-  }, [registerError]);
+  };
 
   const handleCloseModal = () => {
     setShowSuccessModal(false);
@@ -184,27 +197,11 @@ export default function CreateUploadForm() {
     <div className="w-full flex flex-col items-center gap-[2.222vw]">
       <div className="w-full grid grid-rows-3 grid-cols-2 gap-[1.667vw]">
         <div className="flex flex-col gap-[0.444vw]">
-          <p className="text-[var(--color-emas-nusantara)] text-[0.972vw] font-medium font-jakarta">
-            Alamat Smart Contract
-          </p>
-          <div className="flex flex-col gap-[0.444vw]">
-            <div className="flex flex-row w-[37.5vw] border-[0.056vw] border-[var(--color-coklat-jati)] rounded-[0.556vw] bg-black p-[0.778vw]">
-              <input
-                className="w-[25vw] text-[var(--color-krem-lontar)] bg-transparent font-jakarta text-[1.111vw] border-0 outline-0"
-                type="text"
-                value={creatorAddress}
-                placeholder="0xxxx"
-                onChange={handleCreatorAddress}
-              />
-            </div>
-          </div>
-        </div>
-        <div className="flex flex-col gap-[0.444vw]">
           <p className="text-[var(--color-emas-nusantara)] text-[0.972vw] font-medium font-jakarta">Judul</p>
           <div className="flex flex-col gap-[0.444vw]">
             <div className="flex flex-row w-[37.5vw] border-[0.056vw] border-[var(--color-coklat-jati)] rounded-[0.556vw] bg-black p-[0.778vw]">
               <input
-                className="w-[25vw] text-[var(--color-krem-lontar)] bg-transparent font-jakarta text-[1.111vw] border-0 outline-0"
+                className="w-full text-[var(--color-krem-lontar)] bg-transparent font-jakarta text-[1.111vw] border-0 outline-0"
                 type="text"
                 value={title}
                 placeholder="Contoh: Rayuan Pulau Kelapa"
@@ -218,7 +215,7 @@ export default function CreateUploadForm() {
           <div className="flex flex-col gap-[0.444vw]">
             <div className="flex flex-row w-[37.5vw] border-[0.056vw] border-[var(--color-coklat-jati)] rounded-[0.556vw] bg-black p-[0.778vw]">
               <input
-                className="w-[25vw] text-[var(--color-krem-lontar)] bg-transparent font-jakarta text-[1.111vw] border-0 outline-0"
+                className="w-full text-[var(--color-krem-lontar)] bg-transparent font-jakarta text-[1.111vw] border-0 outline-0"
                 type="text"
                 value={artist}
                 placeholder="Nama Artis"
@@ -232,7 +229,7 @@ export default function CreateUploadForm() {
           <div className="flex flex-col gap-[0.444vw]">
             <div className="flex flex-row w-[37.5vw] border-[0.056vw] border-[var(--color-coklat-jati)] rounded-[0.556vw] bg-black p-[0.778vw]">
               <input
-                className="w-[25vw] text-[var(--color-krem-lontar)] bg-transparent font-jakarta text-[1.111vw] border-0 outline-0"
+                className="w-full text-[var(--color-krem-lontar)] bg-transparent font-jakarta text-[1.111vw] border-0 outline-0"
                 type="text"
                 value={genre}
                 placeholder="Pop, Dangdut, Rock, dll"
@@ -246,7 +243,7 @@ export default function CreateUploadForm() {
           <div className="flex flex-col gap-[0.444vw]">
             <div className="flex flex-row w-[37.5vw] border-[0.056vw] border-[var(--color-coklat-jati)] rounded-[0.556vw] bg-black p-[0.778vw]">
               <input
-                className="w-[25vw] text-[var(--color-krem-lontar)] bg-transparent font-jakarta text-[1.111vw] border-0 outline-0"
+                className="w-full text-[var(--color-krem-lontar)] bg-transparent font-jakarta text-[1.111vw] border-0 outline-0"
                 type="text"
                 value={description}
                 placeholder="Ceritakan tentang karya Anda..."
@@ -260,7 +257,7 @@ export default function CreateUploadForm() {
           <div className="flex flex-col gap-[0.444vw]">
             <div className="flex flex-row w-[37.5vw] border-[0.056vw] border-[var(--color-coklat-jati)] rounded-[0.556vw] bg-black p-[0.778vw]">
               <input
-                className="w-[25vw] text-[var(--color-krem-lontar)] bg-transparent font-jakarta text-[1.111vw] border-0 outline-0"
+                className="w-full text-[var(--color-krem-lontar)] bg-transparent font-jakarta text-[1.111vw] border-0 outline-0"
                 type="text"
                 value={duration}
                 placeholder="Format (MM:SS)"
@@ -278,23 +275,33 @@ export default function CreateUploadForm() {
             {/* Input file */}
             <label className="cursor-pointer flex flex-row items-center justify-between w-[37.5vw] border-[0.069vw] border-[var(--color-coklat-jati)] rounded-[0.556vw] bg-black p-[0.778vw] hover:bg-[var(--color-coklat-jati)]/10 transition-all">
               <span className="text-[var(--color-krem-lontar)] font-jakarta text-[1.111vw]">
-                {audioFile ? audioFile.name : "Pilih File Audio (.mp3, .wav)"}
+                {isProcessingAudio 
+                  ? "Memproses file audio..." 
+                  : audioFile 
+                    ? audioFile.name 
+                    : "Pilih File Audio (.mp3, .wav)"}
               </span>
               <input
                 type="file"
                 accept="audio/*"
                 onChange={handleAudioUpload}
                 className="hidden"
+                disabled={isProcessingAudio}
               />
             </label>
 
             {/* Preview */}
-            {audioUrl && (
-              <audio
-                controls
-                src={audioUrl}
-                className="w-[37.5vw] rounded-[0.556vw] bg-neutral-800"
-              />
+            {audioUrl && !isProcessingAudio && (
+              <div className="flex flex-col gap-[0.333vw]">
+                <p className="text-[var(--color-emas-nusantara)]/70 font-jakarta text-[0.833vw]">
+                  Preview Audio:
+                </p>
+                <audio
+                  controls
+                  src={audioUrl}
+                  className="w-[37.5vw] rounded-[0.556vw] bg-neutral-800"
+                />
+              </div>
             )}
           </div>
         </div>
@@ -326,30 +333,22 @@ export default function CreateUploadForm() {
       </div>
       <button
         onClick={handleCreateKarya}
-        disabled={isRegistering || isConfirming || isUploading || !isConnected}
+        disabled={isUploading || !authenticated}
         className="btn-primary-nusantara cursor-pointer w-[37.5vw] flex flex-row aspect-[408/36] justify-center items-center rounded-[0.556vw] disabled:opacity-50 disabled:cursor-not-allowed shadow-wayang"
       >
         <p className="text-[0.972vw] text-white font-jakarta font-semibold">
-          {isUploading || isRegistering
-            ? "Mengunggah..."
-            : isConfirming
-            ? "Mengkonfirmasi..."
-            : !isConnected
-            ? "Hubungkan Dompet"
+          {isUploading
+            ? "Menyimpan..."
+            : !authenticated
+            ? "Login Terlebih Dahulu"
             : "Buat Karya"}
         </p>
       </button>
 
-      {transactionHash && (
-        <p className="text-[var(--color-emas-nusantara)] text-[0.833vw] font-jakarta">
-          Hash Transaksi: {transactionHash}
-        </p>
-      )}
-
       <TransactionSuccessModal
         isOpen={showSuccessModal}
         onClose={handleCloseModal}
-        transactionHash={transactionHash}
+        transactionHash={null}
         title="Musik Berhasil Dibuat!"
       >
         <div className="space-y-[1.111vw]">

@@ -1,17 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import MusicPoolCard from "../dashboard/MusicPoolCard";
 import { IoPeopleSharp } from "react-icons/io5";
 import { FaHourglassEnd } from "react-icons/fa";
-import { RiCoinsLine } from "react-icons/ri";
-import { useAccount } from "wagmi";
-import { useContributeToCampaign } from "@/app/hooks/useCrowdfundingPool";
-import { formatEther } from "viem";
+import { usePrivy } from '@privy-io/react-auth';
+import { saveInvestment, generateId } from "@/app/utils/localStorage";
 import TransactionSuccessModal from "@/app/components/common/TransactionSuccessModal";
 
 export interface InvestCardProps {
-  campaignId: number;
+  campaignId: string;
   musicTitle: string;
   musicArtist: string;
   coverImageUrl?: string;
@@ -21,9 +19,11 @@ export interface InvestCardProps {
   timeRemaining: string;
   targetListeners: number;
   genre?: string;
-  goalAmount?: bigint;
-  raisedAmount?: bigint;
+  goalAmount?: number;
+  raisedAmount?: number;
   royaltyPercentage?: number;
+  description?: string;
+  onInvestSuccess?: () => void;
 }
 
 const InvestCard = ({
@@ -39,74 +39,98 @@ const InvestCard = ({
   goalAmount,
   raisedAmount,
   royaltyPercentage,
+  onInvestSuccess,
 }: InvestCardProps) => {
-  const { isConnected } = useAccount();
-  const { contribute, isContributing, isConfirming, isConfirmed, contributeError, transactionHash } =
-    useContributeToCampaign();
+  const { authenticated, user } = usePrivy();
 
   const [investAmount, setInvestAmount] = useState<string>("");
-  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const [investmentData, setInvestmentData] = useState<{
     amount: string;
-    campaignId: number;
+    campaignId: string;
     musicTitle: string;
     musicArtist: string;
     royaltyPercentage?: number;
   } | null>(null);
 
-  const getRiskColor = (risk: string) => {
+  const getRiskColorClass = (risk: string) => {
     switch (risk) {
       case "Low Risk":
-        return "#72FFC7";
+        return "text-[#72FFC7]";
       case "Medium Risk":
-        return "#FFD700";
+        return "text-[#FFD700]";
       case "High Risk":
-        return "#FF6B6B";
+        return "text-[#FF6B6B]";
       default:
-        return "#72FFC7";
+        return "text-[#72FFC7]";
     }
   };
 
   const handleInvest = () => {
-    if (!isConnected) {
-      alert("Please connect your wallet to invest");
+    if (!authenticated) {
+      alert("Mohon hubungkan akun Anda untuk berinvestasi");
       return;
     }
 
     if (!investAmount || parseFloat(investAmount) <= 0) {
-      alert("Please enter a valid investment amount");
+      alert("Masukkan jumlah investasi yang valid");
       return;
     }
 
-    // Save investment data before transaction
-    setInvestmentData({
-      amount: investAmount,
-      campaignId,
-      musicTitle,
-      musicArtist,
-      royaltyPercentage,
-    });
-
-    // Trigger wallet modal
-    contribute(campaignId, investAmount);
-  };
-
-  // Watch for transaction hash - shows modal 3 seconds after user signs in wallet
-  useEffect(() => {
-    if (transactionHash && investmentData) {
-      const timer = setTimeout(() => {
-        setShowSuccessModal(true);
-      }, 3000); // 3 second delay
-
-      return () => clearTimeout(timer);
+    if (!user?.id) {
+      alert("User ID tidak ditemukan");
+      return;
     }
-  }, [transactionHash, investmentData]);
+
+    setIsProcessing(true);
+
+    try {
+      // Create investment object
+      const investment = {
+        id: generateId(),
+        campaignId,
+        musicTitle,
+        investorAddress: user.id,
+        amount: investAmount,
+        investedAt: new Date().toISOString(),
+        royaltyShare: royaltyPercentage || 0,
+      };
+
+      // Save investment - this will automatically update the campaign
+      saveInvestment(investment);
+
+      // Save investment data for success modal
+      setInvestmentData({
+        amount: investAmount,
+        campaignId,
+        musicTitle,
+        musicArtist,
+        royaltyPercentage,
+      });
+
+      // Show success modal after a brief delay
+      setTimeout(() => {
+        setIsProcessing(false);
+        setShowSuccessModal(true);
+      }, 500);
+
+    } catch (error) {
+      console.error("Error processing investment:", error);
+      alert("Gagal memproses investasi. Silakan coba lagi.");
+      setIsProcessing(false);
+    }
+  };
 
   const handleCloseModal = () => {
     setShowSuccessModal(false);
     setInvestAmount("");
     setInvestmentData(null);
+    
+    // Trigger parent refresh
+    if (onInvestSuccess) {
+      onInvestSuccess();
+    }
   };
 
   return (
@@ -127,17 +151,14 @@ const InvestCard = ({
               {fundedPercentage}% terdanai
             </p>
           </div>
-          <div className="w-full aspect-[1036/11] flex flex-row justify-between bg-black-lighter">
+          <div className="w-full aspect-[1036/11] flex flex-row justify-between bg-[var(--color-hitam-ebony)] rounded-full overflow-hidden relative">
             <div
-              className="aspect-[1036/11] flex flex-row justify-between bg-purple-lighter"
-              style={{ width: `${fundedPercentage}%` }}
+              className="aspect-[1036/11] flex flex-row justify-between bg-gradient-to-r from-[var(--color-merah-kebangsaan)] to-[var(--color-emas-nusantara)] rounded-full transition-all duration-300 absolute left-0 top-0"
+              style={{ width: `${Math.min(fundedPercentage, 100)}%` }}
             ></div>
           </div>
           <div className="flex flex-row gap-[1.333vw]">
-            <p
-              className="font-jakarta text-[0.8333vw]"
-              style={{ color: getRiskColor(riskLevel) }}
-            >
+            <p className={`font-jakarta text-[0.8333vw] font-semibold ${getRiskColorClass(riskLevel)}`}>
               {riskLevel}
             </p>
             <div className="flex flex-row justify-center items-center gap-[0.444vw]">
@@ -164,48 +185,38 @@ const InvestCard = ({
             </p>
           </div>
           <div className="flex flex-col gap-[0.556vw]">
-            <div className="flex flex-row gap-[0.556vw]">
-              <div className="flex flex-row gap-[0.556vw] rounded-[0.556vw] border-[0.069vw] border-white px-[1.111vw] items-center bg-black">
-                <RiCoinsLine size={20} color="white" />
+              <div className="flex flex-row gap-[0.556vw]">
                 <input
-                  className="font-inter text-white bg-transparent text-[1.111vw] outline-none w-[8vw]"
+                  className="font-inter text-white bg-transparent border-2 border-white px-[1.111vw] py-[0.556vw] rounded-[0.556vw] text-[1.111vw] outline-none w-[8vw]"
                   type="number"
-                  step="0.001"
-                  placeholder="0.01 ETH"
+                  step="1"
+                  placeholder="0 USD"
                   value={investAmount}
                   onChange={(e) => setInvestAmount(e.target.value)}
-                  disabled={isContributing || isConfirming}
+                  disabled={isProcessing}
                 />
+                <button
+                  onClick={handleInvest}
+                  disabled={isProcessing || !authenticated}
+                  className="w-[7.431vw] bg-gradient-to-r from-[var(--color-merah-kebangsaan)] to-[var(--color-emas-nusantara)] flex justify-center items-center rounded-[0.486vw] hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-wayang"
+                >
+                  <p className="font-inter text-white text-[0.972vw] font-medium">
+                    {isProcessing ? "Memproses..." : "Investasi"}
+                  </p>
+                </button>
               </div>
-              <button
-                onClick={handleInvest}
-                disabled={isContributing || isConfirming || !isConnected}
-                className="w-[7.431vw] bg-purple-base flex justify-center items-center rounded-[0.486vw] hover:bg-purple-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                <p className="font-inter text-white text-[0.972vw] font-medium">
-                  {isContributing || isConfirming ? "Processing..." : "Invest"}
-                </p>
-              </button>
-            </div>
 
             {/* Royalty Info */}
             {royaltyPercentage && (
-              <p className="text-white-darker text-[0.722vw]">
-                You will receive {royaltyPercentage / 100}% of future royalties
+              <p className="text-[var(--color-krem-lontar)]/70 text-[0.722vw] font-jakarta">
+                Anda akan menerima {royaltyPercentage / 100}% dari royalti masa depan
               </p>
             )}
 
             {/* Goal Info */}
-            {goalAmount && raisedAmount && (
-              <p className="text-white-darker text-[0.722vw]">
-                {formatEther(raisedAmount)} ETH / {formatEther(goalAmount)} ETH raised
-              </p>
-            )}
-
-            {/* Error Message */}
-            {contributeError && (
-              <p className="text-red-400 text-[0.722vw]">
-                Error: {contributeError.message}
+            {goalAmount && raisedAmount !== undefined && (
+              <p className="text-[var(--color-krem-lontar)]/70 text-[0.722vw] font-jakarta">
+                ${raisedAmount} USD / ${goalAmount} USD terkumpul
               </p>
             )}
           </div>
@@ -215,29 +226,29 @@ const InvestCard = ({
       <TransactionSuccessModal
         isOpen={showSuccessModal}
         onClose={handleCloseModal}
-        transactionHash={transactionHash}
-        title="Investment Successful!"
+        transactionHash={undefined}
+        title="Investasi Berhasil!"
       >
         <div className="space-y-[1.111vw]">
-          <div className="bg-black border border-white-darker rounded-[0.556vw] p-[1.111vw]">
-            <h3 className="font-semibold font-jakarta text-white text-[1.111vw] mb-[0.833vw]">Your Investment</h3>
+          <div className="bg-black border border-[var(--color-coklat-jati)] rounded-[0.556vw] p-[1.111vw]">
+            <h3 className="font-semibold font-jakarta text-white text-[1.111vw] mb-[0.833vw]">Investasi Anda</h3>
             <div className="space-y-[0.556vw]">
               <div className="flex justify-between">
-                <span className="text-white-darker text-[0.833vw] font-jakarta">Amount:</span>
-                <span className="font-bold text-white text-[0.833vw] font-jakarta">{investmentData?.amount} ETH</span>
+                <span className="text-[var(--color-krem-lontar)]/70 text-[0.833vw] font-jakarta">Jumlah:</span>
+                <span className="font-bold text-white text-[0.833vw] font-jakarta">${investmentData?.amount} USD</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-white-darker text-[0.833vw] font-jakarta">Music:</span>
+                <span className="text-[var(--color-krem-lontar)]/70 text-[0.833vw] font-jakarta">Musik:</span>
                 <span className="font-medium text-white text-[0.833vw] font-jakarta">{investmentData?.musicTitle}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-white-darker text-[0.833vw] font-jakarta">Artist:</span>
+                <span className="text-[var(--color-krem-lontar)]/70 text-[0.833vw] font-jakarta">Artis:</span>
                 <span className="font-medium text-white text-[0.833vw] font-jakarta">{investmentData?.musicArtist}</span>
               </div>
               {investmentData?.royaltyPercentage && (
                 <div className="flex justify-between">
-                  <span className="text-white-darker text-[0.833vw] font-jakarta">Royalty Share:</span>
-                  <span className="font-medium text-green-400 text-[0.833vw] font-jakarta">
+                  <span className="text-[var(--color-krem-lontar)]/70 text-[0.833vw] font-jakarta">Bagi Hasil Royalti:</span>
+                  <span className="font-medium text-[var(--color-emas-nusantara)] text-[0.833vw] font-jakarta">
                     {investmentData.royaltyPercentage / 100}%
                   </span>
                 </div>
@@ -245,9 +256,9 @@ const InvestCard = ({
             </div>
           </div>
 
-          <div className="bg-purple-base bg-opacity-20 border border-purple-lighter rounded-[0.556vw] p-[1.111vw]">
-            <p className="text-[0.833vw] text-white font-jakarta">
-              Your investment has been submitted! You are now a contributor to this music campaign and will receive royalty payments based on the music&apos;s performance.
+          <div className="bg-gradient-to-r from-[var(--color-merah-kebangsaan)]/20 to-[var(--color-emas-nusantara)]/20 border border-[var(--color-emas-nusantara)]/30 rounded-[0.556vw] p-[1.111vw]">
+            <p className="text-[0.833vw] text-[var(--color-krem-lontar)] font-jakarta">
+              Investasi Anda telah berhasil! Anda sekarang adalah kontributor kampanye musik ini dan akan menerima pembayaran royalti berdasarkan performa musik tersebut.
             </p>
           </div>
 

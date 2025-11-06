@@ -1,11 +1,18 @@
 import HeroDashboard from "@/app/components/dashboard/HeroDashboard";
 import MusicPool from "@/app/components/dashboard/MusicPool";
 import SmartContractAudit from "@/app/components/dashboard/SmartContractAudit";
+import RoyaltyCard from "@/app/components/common/RoyaltyCard";
 
 export default function DashboardMusisi() {
   return (
     <section className="flex flex-col w-full gap-[2.222vw] relative">
       <HeroDashboard />
+
+      {/* Gorga Divider */}
+      <div className="divider-gorga w-full my-6" />
+
+      {/* Creator Royalty Card */}
+      <RoyaltyCard userRole="Creator" />
 
       {/* Gorga Divider */}
       <div className="divider-gorga w-full my-6" />

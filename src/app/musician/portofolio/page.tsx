@@ -1,5 +1,6 @@
 import NFTList from "@/app/components/portofolio/NFTList";
 import PortofolioValue from "@/app/components/portofolio/PortofolioValue";
+import RoyaltyCard from "@/app/components/common/RoyaltyCard";
 
 const PortofolioPage = () => {
   return (
@@ -7,6 +8,10 @@ const PortofolioPage = () => {
       <p className="font-jakarta font-bold text-white text-[1.667vw]">
         Your Trending Pool Music
       </p>
+
+      {/* Royalty Earnings Card */}
+      <RoyaltyCard userRole="Creator" />
+
       <div className="flex flex-col w-full p-[1.111vw] gap-[0.667vw]">
         <p className="font-jakarta text-white text-[1.389vw]">Studio</p>
         <div className="flex flex-row justify-between">
